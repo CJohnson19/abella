@@ -727,10 +727,10 @@ pure_top_command:
     { Types.Define(Types.CoInductive, $2, $5) }
   | QUERY metaterm DOT
     { Types.Query($2) }
-  | IMPORT QSTRING DOT
-    { Types.Import($2, []) }
-  | IMPORT QSTRING WITH import_withs DOT
-    { Types.Import($2, $4) }
+  | IMPORT QSTRING import_hash DOT
+    { Types.Import($2, [], $3) }
+  | IMPORT QSTRING WITH import_withs import_hash DOT
+    { Types.Import($2, $4, $5) }
   | SPECIFICATION QSTRING DOT
     { Types.Specification($2) }
   | KKIND id_list knd DOT
@@ -749,6 +749,11 @@ import_withs:
     { [$1, $3] }
   | id DEFEQ id COMMA import_withs
     { ($1, $3) :: $5 }
+
+import_hash:
+  | COLON QSTRING
+    { Some $2 }
+  | { None }
 
 common_command:
   | SET id id DOT

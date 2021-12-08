@@ -704,9 +704,18 @@ and process_top1 () =
   | TopCommon(Set(k, v)) -> set k v
   | TopCommon(Show(n)) -> Prover.show n
   | TopCommon(Quit) -> raise End_of_file
-  | Import(filename, withs) ->
+  | Import(filename, withs, ipfs_hash) -> begin
+      begin match ipfs_hash with
+      | Some h ->
+          let cmd = Printf.sprintf "~/go/bin/ipfs cat %S > %s.thm" h filename in
+          Printf.printf "(* %s *)\n%!" cmd ;
+          if Sys.command cmd != 0 then
+            failwithf "Could not import %S to %s.thm" h filename
+      | None -> ()
+      end ;
       compile (CImport (filename, withs)) ;
-      import (normalize_filename filename) withs;
+      import (normalize_filename filename) withs
+    end
   | Specification(filename) ->
       if !can_read_specification then begin
         read_specification (normalize_filename filename) ;
