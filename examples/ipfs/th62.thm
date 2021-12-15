@@ -2,8 +2,7 @@
 
 Specification "nat".
 
-Import "defnat".
-Import "defalgos".
+Import "th61".
 
 Theorem nat_acc : forall N, nat N -> lt_acc N.
 induction on 1. intros. case H1.

@@ -719,10 +719,15 @@ and process_top1 () =
               (* Printf.printf "the protocol is %s path is %s\n" protocol path *)
               (* assuming that we only deal with importing a direct 'cid' from ipfs -- without a long path of directories*)
               let p = String.sub path 2 (String.length path - 2) in
-              let cmd = Printf.sprintf "ipfs cat %S > %s.thm" p p in
+              let cmd = Printf.sprintf "ipfs get %S" p in
               Printf.printf "(* %s *)\n%!" cmd ;
               if Sys.command cmd != 0 then
-                failwithf "Could not import %S to %s.thm" filename filename
+                failwithf "Could not import %S to %s" filename filename
+              else 
+                let mvcmd = Printf.sprintf "mv %s %s.thm" p p in
+                if Sys.command mvcmd != 0 then
+                  failwithf "could not rename"
+                
               compile (CImport (p, withs)) ;
               import (normalize_filename p) withs;
             )
