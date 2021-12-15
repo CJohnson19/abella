@@ -704,18 +704,41 @@ and process_top1 () =
   | TopCommon(Set(k, v)) -> set k v
   | TopCommon(Show(n)) -> Prover.show n
   | TopCommon(Quit) -> raise End_of_file
-  | Import(filename, withs, ipfs_hash) -> begin
-      begin match ipfs_hash with
-      | Some h ->
-          let cmd = Printf.sprintf "~/go/bin/ipfs cat %S > %s.thm" h filename in
-          Printf.printf "(* %s *)\n%!" cmd ;
-          if Sys.command cmd != 0 then
-            failwithf "Could not import %S to %s.thm" h filename
-      | None -> ()
-      end ;
-      compile (CImport (filename, withs)) ;
-      import (normalize_filename filename) withs
-    end
+  | Import(filename, withs) ->
+      let parts = String.split_on_char ':' filename in
+      let len_of_list = List.length parts in
+      if len_of_list = 1 then ( (* no protocol - simple file name *)
+        compile (CImport (filename, withs)) ;
+        import (normalize_filename filename) withs;
+      )
+      else (
+        match parts with
+        | [] -> Printf.printf "empty"
+        | protocol::path::_ ->  
+            if protocol = "ipfs" then (
+              (* Printf.printf "the protocol is %s path is %s\n" protocol path *)
+              (* assuming that we only deal with importing a direct 'cid' from ipfs -- without a long path of directories*)
+              let p = String.sub path 2 (String.length path - 2) in
+              let cmd = Printf.sprintf "ipfs cat %S > %s.thm" p p in
+              Printf.printf "(* %s *)\n%!" cmd ;
+              if Sys.command cmd != 0 then
+                failwithf "Could not import %S to %s.thm" filename filename
+              compile (CImport (p, withs)) ;
+              import (normalize_filename p) withs;
+            )
+            else if protocol = "https" then (
+              (* Printf.printf "the protocol is https %s path is %s\n" protocol path *)
+              let url = String.sub path 2 (String.length path - 2) in
+              let basename_noextenstion = Filename.remove_extension(Filename.basename url) in
+              let cmd = Printf.sprintf "wget %s -O %s.thm" url basename_noextenstion in
+              Printf.printf "(* %s *)\n%!" cmd ;
+              if Sys.command cmd != 0 then
+                failwithf "Could not import %s" url 
+              compile (CImport (basename_noextenstion, withs)) ;
+              import (normalize_filename basename_noextenstion) withs;   
+            ) 
+        | _ -> ()
+      )
   | Specification(filename) ->
       if !can_read_specification then begin
         read_specification (normalize_filename filename) ;

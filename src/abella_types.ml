@@ -65,7 +65,7 @@ type common_command =
 type top_command =
   | Theorem of id * string list * umetaterm
   | Define of flavor * tyctx * udef_clause list
-  | Import of string * (string * string) list * string option
+  | Import of string * (string * string) list
   | Specification of string
   | Query of umetaterm
   | Kind of id list * knd
@@ -258,15 +258,12 @@ let top_command_to_string tc =
         sprintf "%s %s by \n%s"
           (match flavor with Inductive -> "Define" | _ -> "CoDefine")
           (idtys_to_string idtys) (udef_clauses_to_string cls) ;
-    | Import (filename, withs, ipfs_hash) ->
-        sprintf "Import \"%s\"%s%s%s" filename
+    | Import (filename, withs) ->
+        sprintf "Import \"%s\"%s%s" filename
           (if withs = [] then "" else " with ")
           (withs |>
            List.map (fun (a, b) -> a ^ " := " ^ b) |>
            String.concat ", ")
-          (match ipfs_hash with
-           | None -> ""
-           | Some h -> " : \"" ^ h ^ "\"")
     | Specification filename ->
         sprintf "Specification \"%s\"" filename
     | Query q ->
