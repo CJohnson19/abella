@@ -1,6 +1,12 @@
 Changes in 2.0.8-dev from 2.0.7
 -------------------------------
 
+Bugfixes
+
+* Signature extensions with Type and Kind declarations were not being
+  committed to the .thc file.  
+  (Identified by Farah Al Wardani, @innofarah)
+
 
 Changes in 2.0.7
 ------------------

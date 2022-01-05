@@ -151,6 +151,14 @@ let comp_spec_sign = State.rref ([], [])
 let comp_spec_clauses = State.rref []
 let comp_content = State.rref []
 
+let debug_spec_sign1 ?(msg="") () =
+  let (kt, ct) = !comp_spec_sign in
+  Printf.printf "DEBUG: %sspec_ktable = [%s], spec_ctable = [%s]\n"
+    (if msg = "" then "" else "[" ^ msg ^ "] ")
+    (String.concat "," (List.map fst kt))
+    (String.concat "," (List.map fst ct))
+let debug_spec_sign ?(msg="") () = ignore msg
+
 let marshal citem =
   match !compile_out with
   | Some cout -> Marshal.to_channel cout citem []
@@ -159,12 +167,12 @@ let marshal citem =
 let ensure_finalized_specification () =
   if !can_read_specification then begin
     can_read_specification := false ;
-    comp_spec_sign := !sign ;
     comp_spec_clauses := !Prover.clauses
   end
 
 let compile citem =
   ensure_finalized_specification () ;
+  comp_spec_sign := !sign ;
   comp_content := citem :: !comp_content
 
 let predicates (_ktable, ctable) =
@@ -177,6 +185,7 @@ let predicates (_ktable, ctable) =
 let write_compilation () =
   marshal Version.self_digest ;
   marshal Version.version ;
+  debug_spec_sign ~msg:"write_compilation" () ;
   marshal !comp_spec_sign ;
   marshal !comp_spec_clauses ;
   marshal (predicates !sign) ;
@@ -364,7 +373,7 @@ let import filename withs =
                 aux (normalize_filename (Filename.concat file_dir filename)) withs ;
                 process_decls decls
             | CKind(ids, knd) ->
-                check_noredef ids ;
+                (* check_noredef ids ; *)
                 Prover.add_global_types ids knd;
                 process_decls decls
             | CType(ids, (Ty(_, aty) as ty)) when aty = propaty-> begin
@@ -389,7 +398,7 @@ let import filename withs =
                 process_decls
               end
             | CType(ids,ty) ->
-                check_noredef ids ;
+                (* check_noredef ids ; *)
                 Prover.add_global_consts (List.map (fun id -> (id, ty)) ids) ;
                 process_decls decls
             | CClose(ty_subords) ->
@@ -714,7 +723,7 @@ and process_top1 () =
       else (
         match parts with
         | [] -> Printf.printf "empty"
-        | protocol::path::_ ->  
+        | protocol::path::_ ->
             if protocol = "ipfs" then (
               (* Printf.printf "the protocol is %s path is %s\n" protocol path *)
               (* assuming that we only deal with importing a direct 'cid' from ipfs -- without a long path of directories*)
@@ -723,25 +732,25 @@ and process_top1 () =
               Printf.printf "(* %s *)\n%!" cmd ;
               if Sys.command cmd != 0 then
                 failwithf "Could not import %S to %s" filename filename
-              else 
+              else
                 let mvcmd = Printf.sprintf "mv %s %s.thm" p p in
-                if Sys.command mvcmd != 0 then
-                  failwithf "could not rename"
-                
-              compile (CImport (p, withs)) ;
-              import (normalize_filename p) withs;
+                if Sys.command mvcmd != 0 then failwithf "could not rename" ;
+                compile (CImport (p, withs)) ;
+                import (normalize_filename p) withs;
             )
             else if protocol = "https" then (
               (* Printf.printf "the protocol is https %s path is %s\n" protocol path *)
               let url = String.sub path 2 (String.length path - 2) in
-              let basename_noextenstion = Filename.remove_extension(Filename.basename url) in
-              let cmd = Printf.sprintf "wget %s -O %s.thm" url basename_noextenstion in
-              Printf.printf "(* %s *)\n%!" cmd ;
-              if Sys.command cmd != 0 then
-                failwithf "Could not import %s" url 
+              let basename_noextenstion = Filename.remove_extension (Filename.basename url) in
+              let thmfile = basename_noextenstion ^ ".thm" in
+              if not (Sys.file_exists thmfile) then begin
+                let cmd = Printf.sprintf "wget https://%s -O %s.thm" url basename_noextenstion in
+                Printf.printf "(* %s *)\n%!" cmd ;
+                if Sys.command cmd != 0 then failwithf "Could not import %s" url
+              end ;
               compile (CImport (basename_noextenstion, withs)) ;
-              import (normalize_filename basename_noextenstion) withs;   
-            ) 
+              import (normalize_filename basename_noextenstion) withs ;
+            )
         | _ -> ()
       )
   | Specification(filename) ->
@@ -755,11 +764,13 @@ and process_top1 () =
   | Kind(ids,knd) ->
       check_noredef ids;
       Prover.add_global_types ids knd;
-      compile (CKind (ids,knd))
+      compile (CKind (ids,knd)) ;
+      debug_spec_sign ~msg:"Kind" ()
   | Type(ids, ty) ->
       check_noredef ids;
       Prover.add_global_consts (List.map (fun id -> (id, ty)) ids) ;
-      compile (CType(ids, ty))
+      compile (CType(ids, ty)) ;
+      debug_spec_sign ~msg:"Type" ()
   | Close(atys) ->
       Prover.close_types !sign !Prover.clauses atys ;
       compile (CClose(List.map (fun aty -> (aty, Subordination.subordinates !sr aty)) atys))

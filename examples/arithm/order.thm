@@ -1,4 +1,6 @@
 Kind nat type.
+Type z nat.
+Type s nat -> nat.
 
 Import "basic".
 
