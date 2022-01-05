@@ -1,8 +1,6 @@
-%% Proof that every natural number is even or odd
-%%
-%% This is a simple example where induction is needed at a nested rather
-%% than immediate recursive call.
-Specification "nat".
+Kind      nat                 type.
+Type      z                   nat.
+Type      s                   nat -> nat.
 
 Define nat : nat -> prop by
   nat z ;
@@ -46,4 +44,3 @@ induction on 1. intros. case H1.
   case H2.
     search.
     apply IH to H3. search.
-

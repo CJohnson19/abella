@@ -21,7 +21,6 @@ Import "ipfs://QmU9Kb25NaqqfPZqtCzhJP4jsgfeSViqqPhEPL73JcUUkD".
 %%%% Algorithms
 
 Import "defalgos".
-Import "defalgos".
 
 %%%% Properties of algorithms
 
@@ -33,7 +32,6 @@ Import "ipfs://QmNcGVPAD9rJpN3THfSkShezjvXr74GTkP4cQtDbVwR1FA".
 Import "ipfs://QmV128HEtk6d5c1Z8AQp1ktRuqEQRdAhRsdYtS8miKbG7a".
 
 Import "th6".
-Import "th7".
 
 % Totality of gcd N M D, by strong induction on m
 Theorem gcd_total_strong : forall N M,

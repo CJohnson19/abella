@@ -222,7 +222,7 @@ let lookup_const (_, ctable) id =
   try
     freshen_ty (List.assoc id ctable)
   with
-  | Not_found -> failwithf "Unknown constant: %s" id
+  | Not_found -> failwithf "Unknown constant typing: %s" id
 
 (** Desugar types *)
 let rec desugar_aty aty =

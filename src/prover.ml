@@ -187,7 +187,7 @@ let add_defs typarams preds flavor clauses =
 
 let lookup_poly_const k =
   try let Poly (typarams, ty) = List.assoc k (snd !sign) in (typarams, ty) with
-  | Not_found -> failwithf "Unknown constant: %S" k
+  | Not_found -> failwithf "Unknown constant prover: %S" k
 
 
 let register_definition = function
