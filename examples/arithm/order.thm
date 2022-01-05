@@ -1,7 +1,3 @@
-Kind nat type.
-Type z nat.
-Type s nat -> nat.
-
 Import "basic".
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,7 +28,7 @@ Theorem  succ_greater : forall N, nat N -> greater (s N) N.
 Theorem  greater_greater :
  forall N M, nat M -> greater N (s M) -> greater N M.
   induction on 1. intros. case H1. case H2. case H3. search.
-  case H2. apply IH to H3 H4. search. 
+  case H2. apply IH to H3 H4. search.
 
 Theorem  greater_succ :
  forall N M, nat N -> nat M -> greater N M -> N = (s M) \/ greater N (s M).

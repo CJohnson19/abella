@@ -3,8 +3,8 @@ Changes in 2.0.8-dev from 2.0.7
 
 Bugfixes
 
-* Signature extensions with Type and Kind declarations were not being
-  committed to the .thc file.  
+* The *first* Type or Kind declaration was accidentally being added to
+  the specification signature.  
   (Identified by Farah Al Wardani, @innofarah)
 
 

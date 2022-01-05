@@ -1,11 +1,5 @@
-Kind nat type.
-Type z nat.
-Type s nat -> nat.
-
 Import "https://raw.githubusercontent.com/innofarah/abella-examples/main/nats.thm".
-% Import "nats".
-
-%% Import "nats".
+%%%Import "nats".
 %%%Import "ipfs://QmT7djUMjUVZPSuwPnF91sMXAVM9tfvyqCnWga5Tone5Xg".
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

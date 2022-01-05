@@ -167,12 +167,12 @@ let marshal citem =
 let ensure_finalized_specification () =
   if !can_read_specification then begin
     can_read_specification := false ;
+    comp_spec_sign := !sign ;
     comp_spec_clauses := !Prover.clauses
   end
 
 let compile citem =
-  ensure_finalized_specification () ;
-  comp_spec_sign := !sign ;
+  (* ensure_finalized_specification () ; *)
   comp_content := citem :: !comp_content
 
 let predicates (_ktable, ctable) =
@@ -373,7 +373,7 @@ let import filename withs =
                 aux (normalize_filename (Filename.concat file_dir filename)) withs ;
                 process_decls decls
             | CKind(ids, knd) ->
-                (* check_noredef ids ; *)
+                check_noredef ids ;
                 Prover.add_global_types ids knd;
                 process_decls decls
             | CType(ids, (Ty(_, aty) as ty)) when aty = propaty-> begin
@@ -398,7 +398,7 @@ let import filename withs =
                 process_decls
               end
             | CType(ids,ty) ->
-                (* check_noredef ids ; *)
+                check_noredef ids ;
                 Prover.add_global_consts (List.map (fun id -> (id, ty)) ids) ;
                 process_decls decls
             | CClose(ty_subords) ->
